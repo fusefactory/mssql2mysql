@@ -41,7 +41,7 @@ $mssql_connect = mssql_connect(MSSQL_HOST, MSSQL_USER, MSSQL_PASSWORD) or die("C
 echo "=> Connected to Source MS SQL Server on '".MSSQL_HOST."'\n";
 
 // Select MS SQL Database
-$mssql_db = mssql_select_db(MSSQL_DATABASE, $mssql_connect) or die("Couldn't open database '".MSSQL_DATABASE."'\n"); 
+$mssql_db = mssql_select_db(MSSQL_DATABASE, $mssql_connect) or die("Couldn't open database '".MSSQL_DATABASE."'\n");
 echo "=> Found database '".MSSQL_DATABASE."'\n";
 
 // Connect to MySQL
@@ -49,7 +49,7 @@ $mysql_connect = mysql_connect(MYSQL_HOST, MYSQL_USER, MYSQL_PASSWORD) or die("C
 echo "\n=> Connected to Source MySQL Server on ".MYSQL_HOST."\n";
 
 // Select MySQL Database
-$mssql_db = mysql_select_db(MYSQL_DATABASE, $mysql_connect) or die("Couldn't open database '".MYSQL_DATABASE."'\n"); 
+$mssql_db = mysql_select_db(MYSQL_DATABASE, $mysql_connect) or die("Couldn't open database '".MYSQL_DATABASE."'\n");
 echo "=> Found database '".MYSQL_DATABASE."'\n";
 
 $mssql_tables = array();
@@ -77,7 +77,7 @@ if (!empty($mssql_tables))
 		$sql = "select * from information_schema.columns where table_name = '".$table."'";
 		$res = mssql_query($sql);
 
-		if ($res) 
+		if ($res)
 		{
 			$mssql_tables[$table] = array();
 
@@ -99,14 +99,14 @@ if (!empty($mssql_tables))
 					case 'bigint':
 						$data_type = $row['DATA_TYPE'].(!empty($row['NUMERIC_PRECISION']) ? '('.$row['NUMERIC_PRECISION'].')' : '' );
 						break;
-					
+
 					case 'money':
 						$data_type = 'decimal(19,4)';
 						break;
 					case 'smallmoney':
 						$data_type = 'decimal(10,4)';
 						break;
-					
+
 					case 'real':
 					case 'float':
 					case 'decimal':
@@ -163,16 +163,16 @@ if (!empty($mssql_tables))
 				{
 					$ssql = "`".$row['COLUMN_NAME']."` ".$data_type." ".($row['IS_NULLABLE'] == 'YES' ? 'NULL' : 'NOT NULL');
 					array_push($strctsql, $ssql);
-					array_push($fields, $row['COLUMN_NAME']);	
+					array_push($fields, $row['COLUMN_NAME']);
 				}
-				
+
 			}
 
 			$mysql .= "(".implode(',', $strctsql).");";
 			echo "======> Creating table ".$table." on MySQL... ";
 			$q = mysql_query($mysql);
 			echo (($q) ? 'Success':'Failed!'."\n".$mysql."\n")."\n";
-			
+
 			echo "=====> Getting data from table ".$table." on SQL Server\n";
 			$sql = "SELECT * FROM ".$table;
 			$qres = mssql_query($sql);
@@ -189,7 +189,7 @@ if (!empty($mssql_tables))
 					while ($qrow = mssql_fetch_assoc($qres))
 					{
 						$datas = array();
-						foreach ($fields as $field) 
+						foreach ($fields as $field)
 						{
 							$ddata = (!empty($qrow[$field])) ? $qrow[$field] : '';
 							array_push($datas,"'".mysql_real_escape_string($ddata)."'");
@@ -198,14 +198,14 @@ if (!empty($mssql_tables))
 						if (!empty($datas))
 						{
 							//$datas = array_map('addQuote', $datas);
-							//$fields = 
+							//$fields =
 							$mysql = "INSERT INTO `".$table."` (".implode(',',$sfield).") VALUES (".implode(',',$datas).");";
 							//$mysql = mysql_real_escape_string($mysql);
 							//echo $mysql."\n";
 							$q = mysql_query($mysql);
 							$numdata += ($q ? 1 : 0 );
 						}
-						if ($numData % CHUNK_SIZE == 0) {
+						if ($numdata % CHUNK_SIZE == 0) {
 							echo "===> ".number_format($numdata,0,',','.')." data inserted so far\n";
 						}
 					}
